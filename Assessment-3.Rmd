@@ -1,6 +1,6 @@
 ---
 title: "Assessment-3"
-author: "Meka Avinash (s4648886) Kasturi Divya Sree (s4651477)"
+author: "Meka Avinash"
 date: "6/18/2021"
 output: html_document
 ---

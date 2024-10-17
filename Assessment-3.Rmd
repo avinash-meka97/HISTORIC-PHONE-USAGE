@@ -1,0 +1,484 @@
+---
+title: "Assessment-3"
+author: "Meka Avinash (s4648886) Kasturi Divya Sree (s4651477)"
+date: "6/18/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Executive Summary
+
+# **Historic phone usage**
+The data set Historic Phone Usage derived from the source article or a source cited in the article. Keep in mind that data is data, and Tidy Tuesday is designed to help you practise data visualisation and basic data manipulation in R.
+The R ecosystem is the focus of a weekly data project. Because this project sprang out of the R4DS Online Learning Community and the R for Data Science course, an emphasis was made on learning how to summarise and arrange data using ggplot2, tidyr, dplyr, and other tidyverse ecosystem tools to create meaningful charts.Tidy Tuesday's goal is to provide a safe and supportive environment for people to exercise their data wrangling and visualisation abilities without having to reach judgments. While we recognise the two are intertwined, the focus of this activity is solely on developing abilities with real-world data.
+
+# Overview-The quick pitch
+The project Historic phone usage is extracted from tidy tuesday. the project is inclusive of two datasets mobile.csv and landline.csv, given variables in the datasets are country code, entity(country), year, total population , gdp per capita, mobile and landline subscriptions and continent 
+
+
+The package tidyverse is a unified set of data manipulation, data visualization, data transformation with shared design philosophy. hadley wickhen developed most of them.
+
+The package skimr is used for skim() and summary() which is meant to operate dataframes and summary displays result for each column.
+
+Lubridate is a R package that makes working with dates and time easier. Garret Growlemund has invented lubridate.
+
+Scales package provides internal infrastructure like ggplot2 and tools to override default breaks, labels, transformations and palettes.
+
+The package mlbench converts a list into a dataframe.
+
+The caret package (short for Classification And REgression Training) offers utilities that make model training for complex regression and classification issues easier.
+
+The broom package converts the jumbled output of R built-in functions like lm, nls, and t.test into clean tibbles.Hadley Wickham's concept of "tidy data" provides a powerful foundation for data manipulation and analysis.
+
+```{r}
+library(tidyverse)
+library(scales)
+library(skimr)
+library(mlbench)
+library(caret)
+library(datarium)
+library(broom)
+theme_set(theme_light())
+```
+
+
+Reading the csv files mobile and landline and assigning the datasets to the respective variables mobile and landline.
+```{r}
+mobile<-
+  read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-11-10/mobile.csv')
+
+landline<-
+  read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-11-10/landline.csv')
+```
+
+
+# Data Wrangling
+Cleaning, organising, and enriching raw data into a desired format for improved decision making in less time is known as data wrangling. Data wrangling is becoming more common in today's top organisations. Data has become more varied and unstructured, necessitating greater time spent selecting, cleaning, and organising data prior to more extensive analysis.
+
+Multiple data sources are combined into a single dataset for analysis.
+Identifying data gaps and either filling or eliminating them (for example, empty cells in a spreadsheet).
+Identifying extreme outliers in data and either explaining the inconsistencies or deleting them so that analysis may take place Deleting data that is either superfluous or irrelevant to the project you're working on
+
+Renamed mobile_subs with subscriptions using rename function and entity with country. Rename function is used to change the variable name in the given dataset to user required variable.
+Renamed landline_subs with subscriptions and entity with country. same rename function is used.
+```{r}
+mobile<-rename(mobile, c("subscriptions" = "mobile_subs"))
+mobile<-rename(mobile, c("country" = "entity"))
+
+landline<-rename(landline, c("subscriptions" = "landline_subs"))
+landline<-rename(landline, c("country" = "entity"))
+```
+
+
+na.omit is used to return the object with observations removed if they contain any missing values, pass: returns the object unchanged.
+fail: returns the object only that contains no missing values.
+in the datasets mobile and landline removing the NA values which are misplaced in the given datasets.
+```{r}
+mobile<- na.omit(mobile)
+
+landline<- na.omit(landline)
+```
+
+
+summary is a generic function that generates result summaries for various model fitting functions. The function calls certain methods that are determined by the first argument's class.
+skim() is a simple way to get a wide overview of a data frame instead than using summary(). It can handle any type of data, and it uses a distinct set of summary methods depending on the column types in the data frame.
+For the datasets skim and summary functions are used to display the various data types.
+```{r}
+summary(mobile)
+skim(mobile)
+
+summary(landline)
+skim(landline)
+```
+
+
+In R programming count funtion is used to count the number of occurances in a variable for the observations.
+```{r}
+mobile%>%count(year)
+landline%>%count(year)
+```
+
+
+# Data visualization
+The method of converting information into a visual environment, such as a map or graph, to make data easier to interpret and extract insights from is known as data visualisation. Data visualization's major purpose is to make it easier to spot patterns, trends, and outliers in massive datasets. Information graphics, informatio, and other terms are frequently used interchangeably with it.
+
+Data visualisation is a simple and effective approach to convey information to a broad audience using visual data.
+
+the ability to swiftly absorb information, develop insights, and make faster judgments; a better knowledge of what needs to be done next to improve the organisation.
+
+increased capacity to act rapidly on insights and, as a result, achieve achievement with more speed and fewer errors
+
+# Problems
+
+What is the demanding subscription rate of mobiles every year with respect to the continent?
+```{r}
+mobile%>%
+  ggplot(aes(year,subscriptions))+geom_point()+facet_wrap(~continent)+stat_smooth()+labs(x = "over year the years 1990-2013 ",
+                                                                                         y = "mobile subscriptions per 100 people",
+                                                                                         title = "yearly subscriptions of different continents")
+```
+The plot for the data visualisation of the yearly mobile subscriptions of continents  which is elevating every year with a high pitch. The increasing rate of subscription in the major continents like Asia, Americas and Europe. the subscription figure in Africa and Ocenia is at a slow pace compared to other three continents. ggplot is a vast slice of data visualization which comprises of various graphical representations like geom_point, geom_col, geom_boxplot etc. We can make a multi-panel plot with one pane per "alignment" by simply adding + facet wrap(align) to the end of our plot from above. Consider facet wrap() as a plot ribbon that arranges panels into rows and columns and selects the optimal layout for the amount of panels.
+
+
+What is the demanding subscription rate of landline every year with respect to the continent?
+```{r}
+landline%>%
+  ggplot(aes(year,subscriptions))+geom_point()+facet_wrap(~continent)+stat_smooth()+labs(x = "over year the years 1990-2013 ",
+                                                                                         y = "landline subscriptions per 100 people",
+                                                                                         title = "yearly subscriptions of different continents")
+```
+The representation of yearly landline subscriptions of continents dropping drastically with the advent of the cellular phone era. Asia, Africa and Ocenia are consistent with their landline subscriptions, whereas Americas and Europe are bobbing. 
+In the year 2000 the continent Europe had 33% of subscriptions and sliced down to 30%.
+On the other hand Americas figure has inclined from 15% to 25% from the year 1990 to 2000. The year 2013 has seen a fall of landline subscriptions.
+
+
+What are the average mobile subscriptions divided per continent?
+```{r}
+mobile%>%
+  group_by(year,continent)%>%
+  summarise(avg_subs = mean(subscriptions))%>%
+  ggplot(aes(year,avg_subs))+
+  geom_path()+facet_wrap(~continent)
+```
+The multiplication of mobile subscriptions in the continents Europe, Asia and Americas has been recorded with 120 subscriptions per 100 people respectively. Ocenia and Africa were consistent undeviating growth. The result is obtained by grouping the years and continents, summarising the mean subscriptions by drafting a graphical representation.
+
+
+What are the average landline subscriptions divided per continent?
+```{r}
+landline%>%
+  group_by(year,continent)%>%
+  summarise(avg_subs = mean(subscriptions))%>%
+  ggplot(aes(year,avg_subs))+
+  geom_path()+facet_wrap(~continent)
+```
+Europe, America and Ocenia average subscriptions rates have declined with 32, 18, 11 subscriptions appropriately. Asia and Africa have remained consonants.The result is obtained by grouping the years and continents, summarising the mean subscriptions by drafting a graphical representation.
+
+
+What is the average population of every country?
+```{r}
+populus_mobile<-mobile%>%
+  group_by(country)%>%
+  summarise(avg_population = mean(total_pop))%>%
+  arrange(desc(avg_population))
+```
+Extracted and grouped all the countries from the dataset by calculating their mean population and arranging them in a descending order. For instance, China-1.270563e+09,India-1.077699e+09,United States-2.860961e+08
+
+
+What the dependency of mobile subscriptions on highest populated countries?
+```{r}
+mobile%>%
+ semi_join(populus_mobile%>%top_n(10,avg_population),by = "country")%>%
+  ggplot(aes(year,subscriptions,colour = total_pop))+geom_path()+facet_wrap(~country)+
+  labs(x = "from year 1990-2010",
+       y = "mobile subcsubscriptions per 100 people",
+       title = "countries with highest average population")
+```
+To draw the difference between the graphical representation  of years1990-2010 , the increase in mobile subscriptions with the country’s average population. The increase in population urges the increase in mobile usage. Few countries like Russia, United States, Brazil, China, Indonesia experiencing a steady rise in population. Russia has surged from 0 to 150 subscriptions for 100 people followed by Brazil and United states by 150 and 100 each.
+
+
+What the dependency of mobile subscriptions on least populated countries?
+```{r}
+mobile%>%
+ semi_join(populus_mobile%>%top_n(-10,avg_population),by = "country")%>%
+  ggplot(aes(year,subscriptions,colour = total_pop))+geom_path()+facet_wrap(~country)+
+  labs(x = "from year 1990-2010",
+       y = "mobile subcsubscriptions per 100 people",
+       title = "countries with least average population")
+```
+The countries like Nauru, Cayman Islands,Palau encounters a small mobile phones count with respect to population for the year. For instance Dominica Bermuda and Seychelles, 150 each.
+
+
+What is the average population of every country?
+```{r}
+populus_land<-landline%>%
+  group_by(country)%>%
+  summarise(avg_population = mean(total_pop))%>%
+  arrange(desc(avg_population))
+```
+Extracted and grouped all the countries from the dataset by calculating their mean population and arranging them in a descending order. For instance, Indonesia-2.224430e+08,Brazil-1.810573e+08,Pakistan-1.557126e+08 
+
+
+What the dependency of landline subscriptions on highest populated countries?
+```{r}
+landline%>%
+ semi_join(populus_land%>%top_n(10,avg_population),by = "country")%>%
+  ggplot(aes(year,subscriptions,colour = total_pop))+geom_path()+facet_wrap(~country)+
+  labs(x = "from year 1990-2010",
+       y = "landline subscriptions per 100 people",
+       title = "countries with highest average population")
+```
+The visual view of the landlines, which depicts the downfall of landlines usgae in the countries like, Brazil, Russia, United States, Nigeria, Pakistan. India, Bangladesh and Nigeria maintained a congruous subscription rate. The US faced a dwindle in landline subscriptions.
+
+
+
+What the dependency of landline subscriptions on least populated countries?
+```{r}
+landline%>%
+ semi_join(populus_land%>%top_n(-10,avg_population),by = "country")%>%
+  ggplot(aes(year,subscriptions,colour = total_pop))+geom_path()+facet_wrap(~country)+
+  labs(x = "from year 1990-2010",
+       y = "landline subscriptions per 100 people",
+       title = "countries with least average population")
+```
+The countries, Bermuda, Tuvalu have engorssed in the inclination of the landlines. Excluding bermuda countries like palau, Nauru have seen the shrinkage in the subscriptions.
+
+
+What is the average GDP of every country?
+```{r}
+gdp_mobile<-mobile%>%
+  group_by(country)%>%
+  summarise(avg_gdp = mean(gdp_per_cap))%>%
+  arrange(desc(avg_gdp))
+```
+Extracted and grouped all the countries from the dataset by calculating their mean GDP and arranging them in a descending order. For instance, Qatar-116964.6012, United Arab Emirates-89246.7605, Brunei-83286.6252
+
+
+What the dependency of mobile subscriptions on highest average GDP countries?
+```{r}
+mobile%>%
+ semi_join(gdp_mobile%>%top_n(10,avg_gdp),by = "country")%>%
+  ggplot(aes(year,subscriptions,colour = gdp_per_cap))+
+  geom_path()+
+  facet_wrap(~country)+
+  labs(x = "from year 1990-2010",
+       y = "mobile subcsubscriptions per 100 people",
+       title = "countries with highest average gdp")
+```
+The outline between the GDP of the countries and the mobile subscriptions. The rise in origin of mobile phones is multiplied every year for the countries like the Luxembourg, Singapore, Switzerland along with the growth of GDP. Macao has the highest subscriptions with GDP at 300 subscriptions per 100 people. UAE has 200 subscriptions per 100 people.
+
+
+What the dependency of mobile subscriptions on least average GDP countries?
+```{r}
+mobile%>%
+ semi_join(gdp_mobile%>%top_n(-10,avg_gdp),by = "country")%>%
+  ggplot(aes(year,subscriptions,colour = gdp_per_cap))+
+  geom_path()+
+  facet_wrap(~country)+
+  labs(x = "from year 1990-2010",
+       y = "mobile subcsubscriptions per 100 people",
+       title = "countries with least average gdp")
+```
+In Contrast, few countries like the Niger ,Rwanda are the least in GDP contribution when scaled on average in combination with the mobile phones. they have 40 and 60 subscriptions per 100 people. Burundi, Ethiopia, Malawi has the least subscriptions in correspondence with GDP.
+
+
+What is the average GDP of every country?
+```{r}
+gdp_land<-landline%>%
+  group_by(country)%>%
+  summarise(avg_gdp = mean(gdp_per_cap, na.rm = TRUE))%>%
+  arrange(desc(avg_gdp))
+```
+Extracted and grouped all the countries from the dataset by calculating their mean GDP and arranging them in a descending order. For instance, Luxembourg-81523.1655, Kuwait-78343.3090, San Marino-72343.5068
+
+
+What the dependency of landline subscriptions on highest average GDP countries?
+```{r}
+landline%>%
+ semi_join(gdp_mobile%>%top_n(10,avg_gdp),by = "country")%>%
+  ggplot(aes(year,subscriptions,colour = gdp_per_cap))+geom_path()+facet_wrap(~country)+
+  labs(x = "from year 1990-2010",
+       y = "landline subscriptions per 100 people",
+       title = "countries with highest average gdp")
+```
+The contradiction drawn between GDP and landline subscriptions, The subscription rate is diminishing with the dwindle in landline usage, in countries like Brunei,Kuwait, United Arab Emirates hace had adversely faced the scenario. San marino and Norway have the highest subscription downfall in regards with gdp, 49 and 15 subscriptions.
+
+
+What the dependency of landline subscriptions on least average GDP countries?
+```{r}
+landline%>%
+ semi_join(gdp_mobile%>%top_n(-10,avg_gdp),by = "country")%>%
+  ggplot(aes(year,subscriptions,colour = gdp_per_cap))+geom_path()+facet_wrap(~country)+
+  labs(x = "from year 1990-2010",
+       y = "landline subscriptions per 100 people",
+       title = "countries with least average gdp")
+```
+Countires like ethopia, Rwanda have few least average gdp,and minimal usage of landlines. The unaffected factor GDP despite maintaining steady pace, or decrease, the necessity for landline is dropped due to huge demand of mobiles. The subscriptions in Malawi have experienced peaks and valleys.
+
+
+
+```{r}
+mobile<-mobile%>%
+  mutate(type = "Mobile")
+
+landline<-landline%>%
+  mutate(type = "Landline")
+
+phones<-bind_rows(mobile,landline)
+```
+To dig in deep with datasets a new dataset phones is created which is a subset of given datasets.
+
+
+Draw the comparisons between mobile and landline subscriptions for continents?
+```{r}
+phones%>%
+  group_by(year,continent,type)%>%
+  summarise(avg_subs = mean(subscriptions))%>%
+  ggplot(aes(year,avg_subs,colour = type))+
+  geom_path()+facet_wrap(~continent)+
+  labs(x = "from year 1990-2010",
+       y = "average subscriptions per 100 people",
+       title = "mobile and landline subscriptions of continents")
+```
+The continents America, Asia, Europe and Ocenia have giant mobile subscriptions in contrast with landline subscriptions for the years 1990 to 2010. Africa has persistent landline subscriptions over the three decades.
+
+
+What are the subscription rates over income groups?
+```{r}
+phones<-phones%>%
+  mutate(income_type=
+           cut_number(gdp_per_cap,5,
+                      labels=c("low_income","below_avg_income","avg_income","above_avg_income","high_income"),
+                      ordered_results=TRUE))  
+
+phones%>%
+  ggplot(aes(year,subscriptions,colour = type))+geom_point()+facet_wrap(~income_type)+
+  labs(x = "from year 1990-2010",
+       y = "average subscriptions per 100 people",
+       title = "mobile and landline subscriptions of different income groups")
+```
+To the subset phones a new variable income type is added to view the various income levels. cut divides x's range into intervals and codes the values in x according to which one they belong to. Level one corresponds to the leftmost interval, level two to the next, and so on. The assignment function can be used to save labels as an attribute "variable.label" for each variable in a data set. These labels can be evaluated using the extractor function. Using cut number function the income type is divided in to five different types by assigning lables
+
+Mobile and landline subscriptions concerned on income levels of the people in the country. All the various incomes like low, below avg, avg, above avg and highest prefer for a mobile cellular connection than the orthodox landline. The high income group has the high subscription rate of mobiles and landlines.
+
+
+# Modelling and Regression
+A linear regression model examines the relationship between a response variable (commonly referred to as y) and one or more factors, as well as their interactions (often called x or explanatory variables).
+The response variable and the explanatory factors are assumed to have a linear relationship in linear regression. This implies that a line can be drawn between the two (or more variables)
+
+
+In a data frame, finding patterns and correlations between variables.
+The correlation is used to determine whether two or more variables are related.
+
+Corelations between mobile subscriptions and GDP, total population and year.
+```{r}
+cor(mobile$gdp_per_cap,mobile$subscriptions)
+cor(mobile$total_pop,mobile$subscriptions)
+cor(mobile$year,mobile$subscriptions)
+```
+
+
+Corelations between mobile subscriptions and GDP, total population and year. 
+```{r}
+cor(landline$gdp_per_cap,landline$subscriptions)
+cor(landline$total_pop,landline$subscriptions)
+cor(landline$year,landline$subscriptions)
+```
+
+
+Draft the model and regression for subscriptions and total population? 
+```{r}
+model<-lm(subscriptions~total_pop, data = mobile)
+model
+summary(model)
+
+ggplot(mobile, aes(subscriptions,total_pop)) +
+  geom_point() +facet_wrap(~continent)+
+  stat_smooth(method = lm)+
+  labs(x = "subscriptions per 100 people",
+       y = "GDP",
+       title = "linear regression for gdp and subscriptions of continents")
+```
+The following results obtained after modelling are residual standard error  47.14, Coefficients- intercept and total population followed by residuals.  
+
+
+Draft the model and regression for subscriptions and total population? 
+```{r}
+model<-lm(subscriptions~total_pop, data = landline)
+model
+summary(model)
+
+ggplot(landline, aes(subscriptions,total_pop)) +
+  geom_point() +facet_wrap(~continent)+
+  stat_smooth(method = lm)+
+  labs(x = "subscriptions per 100 people",
+       y = "GDP",
+       title = "linear regression for gdp and subscriptions of continents")
+```
+The following results obtained after modelling are residual standard error  18.68, Coefficients- intercept and total population followed by residuals.
+
+
+Draft the model and regression for subscriptions and GDP per capita? 
+```{r}
+model<-lm(subscriptions~gdp_per_cap, data = mobile)
+model
+summary(model)
+
+ggplot(mobile, aes(subscriptions,gdp_per_cap)) +
+  geom_point() +facet_wrap(~continent)+
+  stat_smooth(method = lm)+
+  labs(x = "subscriptions per 100 people",
+       y = "GDP",
+       title = "linear regression for gdp and subscriptions of continents")
+```
+The following results obtained after modelling are residual standard error  42.29, Coefficients- intercept and total population followed by residuals.
+
+
+Draft the model and regression for subscriptions and GDP per capita? 
+```{r}
+model<-lm(subscriptions~gdp_per_cap, data = landline)
+model
+summary(model)
+
+ggplot(landline, aes(subscriptions,gdp_per_cap)) +
+  geom_point() +facet_wrap(~continent)+
+  stat_smooth(method = lm)+
+  labs(x = "subscriptions per 100 people",
+       y = "GDP",
+       title = "linear regression for gdp and subscriptions of continents")
+```
+The following results obtained after modelling are residual standard error  13.88, Coefficients- intercept and total population followed by residuals.
+
+
+
+```{r}
+model<-lm(subscriptions~year, data = mobile)
+model
+summary(model)
+```
+The following results obtained after modelling are residual standard error  31.23, Coefficients- intercept and total population followed by residuals.
+
+
+```{r}
+model<-lm(subscriptions~year, data = landline)
+model
+summary(model)
+```
+The following results obtained after modelling are residual standard error  18.66, Coefficients- intercept and total population followed by residuals.
+
+
+# Conclusion
+To conclude the report, our observations were subscription rate of mobiles and landline every year with respect to the continent, GDP versus subscription rate and population versus subscription rate. Hence data wrangling , data visualisations, data transmission , data manipulations, modelling and regressions are used to derive the mobile and landline subscriptions in various continents, countries over past few decades. Various income groups which effected the subscriptions and the types and average subscriptions. 
+
+
+# Reference
+
+Rviews.rstudio.com. 2019. What is the tidyverse?.  <https://rviews.rstudio.com/2017/06/08/what-is-the-tidyverse/> [Accessed 17 June 2021].
+
+Cran.r-project.org. 2019. Using Skimr.<https://cran.r-project.org/web/packages/skimr/vignettes/skimr.html> [Accessed 17 June 2021].
+ 
+Cran.r-project.org. 2019. Do more with dates and times in R.  <https://cran.r-project.org/web/packages/lubridate/vignettes/lubridate.html> [Accessed 17 June 2021].
+ 
+Scales.r-lib.org. 2018. Scale Functions for Visualization.  <https://scales.r-lib.org/> [Accessed 17 June 2021].
+ 
+Cran.r-project.org. 2018. A Short Introduction to the caret Package.  <https://cran.r-project.org/web/packages/caret/vignettes/caret.html> [Accessed 17 June 2021].
+ 
+Cran.r-project.org. 2019. Introduction to broom. : <https://cran.r-project.org/web/packages/broom/vignettes/broom.html> [Accessed 17 June 2021].
+ 
+Statistics Globe. 2017. NA Omit in R | 3 Examples for na.omit (Data Frame, Vector & by Column). <https://statisticsglobe.com/na-omit-r-example/> [Accessed 17 June 2021].
+ 
+Rdocumentation.org. 2018. summary function - RDocumentation. <https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/summary> [Accessed 17 June 2021]. 
+ 
+ Trifacta. 2019. What is Data Wrangling? | Trifacta. : <https://www.trifacta.com/data-wrangling/> [Accessed 17 June 2021].
+ 
+SearchBusinessAnalytics. 2018. What is data visualization and why is it important?. <https://searchbusinessanalytics.techtarget.com/definition/data-visualization> [Accessed 17 June 2021]. 
+ 
+Rdocumentation.org. 2019. labels function - RDocumentation. <https://www.rdocumentation.org/packages/papeR/versions/1.0-5/topics/labels> [Accessed 17 June 2021]. 
+ 
+Linear Regression 2020. [online] Available at: <https://www.datacamp.com/community/tutorials/linear-regression-R> [Accessed 17 June 2021].
+ 
+Sthda.com. 2018. Correlation Test Between Two Variables in R - Easy Guides - Wiki - STHDA. <http://www.sthda.com/english/wiki/correlation-test-between-two-variables-in-r#what-is-correlation-test> [Accessed 17 June 2021].
+ 
+
